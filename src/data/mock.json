@@ -1,0 +1,31 @@
+{
+  "people": [
+    {
+      "crn": 2100010101,
+      "firstName": "Andrew",
+      "lastName": "Farmer",
+      "organisations": [
+        {
+          "organisationId": "5900001",
+          "name": "Gatwick Airport"
+        }
+      ]
+    },
+    {
+      "crn": 2100010102,
+      "firstName": "Sarah",
+      "lastName": "Plumber",
+      "organisations": [
+        {
+          "organisationId": "5900001",
+          "sbi": 110100101,
+          "name": "Farms Ltd"
+        },
+        {
+          "organisationId": "5900002",
+          "name": "Gatwick Airport"
+        }
+      ]
+    }
+  ]
+}

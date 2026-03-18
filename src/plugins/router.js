@@ -1,0 +1,27 @@
+import Inert from '@hapi/inert'
+import { health } from '../routes/health.js'
+import { index } from '../routes/index.js'
+import { openId } from '../routes/open-id.js'
+import { auth } from '../routes/auth.js'
+import { entraAuth } from '../routes/entra-auth.js'
+import { s3 } from '../routes/s3.js'
+import { serveStaticFiles } from '../common/helpers/serve-static-files.js'
+import { config } from '../config/config.js'
+
+export const router = {
+  plugin: {
+    name: 'router',
+    async register (server) {
+      await server.register([Inert])
+      await server.route(health)
+      await server.route(index)
+      await server.route(openId)
+      await server.route(auth)
+      if (config.get('entra.enabled')) {
+        await server.route(entraAuth)
+      }
+      await server.route(s3)
+      await server.register([serveStaticFiles])
+    }
+  }
+}

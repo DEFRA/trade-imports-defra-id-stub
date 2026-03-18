@@ -1,0 +1,43 @@
+{
+  "people": [
+    {
+      "crn": 3100010101,
+      "firstName": "Julie",
+      "lastName": "Barnes",
+      "organisations": [
+        {
+          "organisationId": "5900001",
+          "name": "Gatwick Airport"
+        }
+      ]
+    },
+    {
+      "crn": 3100010102,
+      "firstName": "Glen",
+      "lastName": "Adams",
+      "organisations": [
+        {
+          "organisationId": "5900001",
+          "name": "Gatwick Airport"
+        }
+      ]
+    },
+    {
+      "crn": 3100010103,
+      "firstName": "Ben",
+      "lastName": "Jones",
+      "organisations": []
+    },
+    {
+      "crn": 3100010104,
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "organisations": [
+        {
+          "organisationId": "5900001",
+          "name": "Gatwick Airport"
+        }
+      ]
+    }
+  ]
+}

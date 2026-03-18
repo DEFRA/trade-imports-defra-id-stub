@@ -1,199 +1,288 @@
 # trade-imports-defra-id-stub
 
-[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-imports-defra-id-stub&metric=security_rating)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-imports-defra-id-stub)
+![Build](https://github.com/defra/trade-imports-defra-id-stub/actions/workflows/publish.yml/badge.svg)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-imports-defra-id-stub&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-imports-defra-id-stub)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-imports-defra-id-stub&metric=bugs)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-imports-defra-id-stub)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-imports-defra-id-stub&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-imports-defra-id-stub)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-imports-defra-id-stub&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-imports-defra-id-stub)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=DEFRA_trade-imports-defra-id-stub&metric=coverage)](https://sonarcloud.io/summary/new_code?id=DEFRA_trade-imports-defra-id-stub)
 
-Core delivery platform Node.js Frontend Template.
+Defra Identity stub for Trade Imports.
 
-- [Requirements](#requirements)
-  - [Node.js](#nodejs)
-- [Server-side Caching](#server-side-caching)
-- [Redis](#redis)
-- [Local Development](#local-development)
-  - [Setup](#setup)
-  - [Development](#development)
-  - [Production](#production)
-  - [Npm scripts](#npm-scripts)
-  - [Update dependencies](#update-dependencies)
-  - [Formatting](#formatting)
-    - [Windows prettier issue](#windows-prettier-issue)
-- [Docker](#docker)
-  - [Development image](#development-image)
-  - [Production image](#production-image)
-  - [Docker Compose](#docker-compose)
-  - [Dependabot](#dependabot)
-  - [SonarCloud](#sonarcloud)
-- [Licence](#licence)
-  - [About the licence](#about-the-licence)
+There are two existing Defra Identity stubs:
 
-## Requirements
+- [Official Defra Identity stub](https://dev.azure.com/defragovuk/DEFRA-Common-Platform-Improvements/_wiki/wikis/DEFRA-Common-Platform-Improvements.wiki/32274/IDM-stub)
+- [CDP Defra Identity stub](https://github.com/DEFRA/cdp-defra-id-stub)
 
-### Node.js
+Neither of these support the `signupsigninsfi` policy used in Trade Imports.
 
-Please install [Node.js](http://nodejs.org/) `>= v22` and [npm](https://nodejs.org/) `>= v9`. You will find it
-easier to use the Node Version Manager [nvm](https://github.com/creationix/nvm)
+This policy enables authentication with a CRN/Password combination and changes the content of the default Defra Identity token.
 
-To use the correct version of Node.js for this application, via nvm:
+> NOTE: this stub is still a work in progress. Feedback and issues welcome.
 
-```bash
-cd trade-imports-defra-id-stub
-nvm use
-```
+## Supported Defra Identity features
 
-## Server-side Caching
+- CRN/Password authentication
+- Exposes all Defra Identity endpoints including well-known endpoints
+- Organisation selection ( -- TODO --)
+- Signed JWT token generation consistent with `signupsigninsfi` policy
+- Token exchange from authorisation
+- Refresh token exchange
+- Single Sign-On (SSO) support (Session lasts one hour, extended on each re-authentication/organisation change)
+- Sign out including ending SSO session
 
-We use Catbox for server-side caching. By default the service will use CatboxRedis when deployed and CatboxMemory for
-local development.
-You can override the default behaviour by setting the `SESSION_CACHE_ENGINE` environment variable to either `redis` or
-`memory`.
 
-Please note: CatboxMemory (`memory`) is _not_ suitable for production use! The cache will not be shared between each
-instance of the service and it will not persist between restarts.
+## Using the stub locally
 
-## Redis
+### Docker
 
-Redis is an in-memory key-value store. Every instance of a service has access to the same Redis key-value store similar
-to how services might have a database (or MongoDB). All frontend services are given access to a namespaced prefixed that
-matches the service name. e.g. `my-service` will have access to everything in Redis that is prefixed with `my-service`.
+This application is intended to be run in a Docker container to ensure consistency across environments.
 
-If your service does not require a session cache to be shared between instances or if you don't require Redis, you can
-disable setting `SESSION_CACHE_ENGINE=false` or changing the default value in `src/config/index.js`.
+Docker can be installed from [Docker's official website](https://docs.docker.com/get-docker/).
 
-## Proxy
+### Run from source
 
-We are using forward-proxy which is set up by default. To make use of this: `import { fetch } from 'undici'` then
-because of the `setGlobalDispatcher(new ProxyAgent(proxyUrl))` calls will use the ProxyAgent Dispatcher
+After cloning the repository, run the below commands to start the container.
 
-If you are not using Wreck, Axios or Undici or a similar http that uses `Request`. Then you may have to provide the
-proxy dispatcher:
-
-To add the dispatcher to your own client:
-
-```javascript
-import { ProxyAgent } from 'undici'
-
-return await fetch(url, {
-  dispatcher: new ProxyAgent({
-    uri: proxyUrl,
-    keepAliveTimeout: 10,
-    keepAliveMaxTimeout: 10
-  })
-})
-```
-
-## Local Development
-
-### Setup
-
-Install application dependencies:
+By default, the application will run on port 3007.  However, this can be overridden by setting the `TRADE_IMPORTS_DEFRA_ID_STUB_PORT` environment variable.
 
 ```bash
-npm install
+# Build the image
+docker compose build
+
+# Run the application
+npm run docker:dev
 ```
 
-### Development
+A `.env` will automatically be read by the Docker compose files allowing to customise the data available.
 
-To run the application in `development` mode run:
-
-```bash
-npm run dev
+```
+AUTH_MODE=mock
+AUTH_OVERRIDE=9999999999:John:Watson:9999999:888888888:John Watson & Co.
+AUTH_OVERRIDE_FILE=example.data.json
 ```
 
-### Production
+> NOTE: if providing a different custom, file the [`compose.override.yml`](./compose.override.yml) file volume may need updating.
 
-To mimic the application running in `production` mode locally run:
+### Docker
+
+Images of this stub are available in DockerHub, [defradigital/trade-imports-defra-id-stub](https://hub.docker.com/repository/docker/defradigital/trade-imports-defra-id-stub).
 
 ```bash
-npm start
+# Pull the latest image
+docker pull defradigital/trade-imports-defra-id-stub
+
+docker run -p 3007:3007 defradigital/trade-imports-defra-id-stub
 ```
 
-### Npm scripts
-
-All available Npm scripts can be seen in [package.json](./package.json)
-To view them in your command line run:
+By default, the application will run on port 3007, however this can be overridden by setting the `PORT` environment variable.
 
 ```bash
-npm run
-```
-
-### Update dependencies
-
-To update dependencies use [npm-check-updates](https://github.com/raineorshine/npm-check-updates):
-
-> The following script is a good start. Check out all the options on
-> the [npm-check-updates](https://github.com/raineorshine/npm-check-updates)
-
-```bash
-ncu --interactive --format group
-```
-
-### Formatting
-
-#### Windows prettier issue
-
-If you are having issues with formatting of line breaks on Windows update your global git config by running:
-
-```bash
-git config --global core.autocrlf false
-```
-
-## Docker
-
-### Development image
-
-> [!TIP]
-> For Apple Silicon users, you may need to add `--platform linux/amd64` to the `docker run` command to ensure
-> compatibility fEx: `docker build --platform=linux/arm64 --no-cache --tag trade-imports-defra-id-stub`
-
-Build:
-
-```bash
-docker build --target development --no-cache --tag trade-imports-defra-id-stub:development .
-```
-
-Run:
-
-```bash
-docker run -p 3000:3000 trade-imports-defra-id-stub:development
-```
-
-### Production image
-
-Build:
-
-```bash
-docker build --no-cache --tag trade-imports-defra-id-stub .
-```
-
-Run:
-
-```bash
-docker run -p 3000:3000 trade-imports-defra-id-stub
+docker run -p 3008:3008 -e PORT=3008 defradigital/trade-imports-defra-id-stub
 ```
 
 ### Docker Compose
 
-A local environment with:
+The image can be added to your application's existing Docker Compose file.
 
-- Localstack for AWS services (S3, SQS)
-- Redis
-- MongoDB
-- This service.
-- A commented out backend example.
-
-```bash
-docker compose up --build -d
+```yaml
+trade-imports-defra-id-stub:
+  image: defradigital/trade-imports-defra-id-stub
+  environment:
+    PORT: 3007
+    AUTH_MODE: ${AUTH_MODE}
+    AUTH_OVERRIDE: ${AUTH_OVERRIDE}
+    AUTH_OVERRIDE_FILE: ${AUTH_OVERRIDE_FILE}
+  ports:
+    - "3007:3007"
+  healthcheck:
+    test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+    interval: 1m30s
+    timeout: 30s
+    retries: 5
+    start_period: 3s
 ```
 
-### Dependabot
+## Using the stub in your application
 
-We have added an example dependabot configuration file to the repository. You can enable it by renaming
-the [.github/example.dependabot.yml](.github/example.dependabot.yml) to `.github/dependabot.yml`
+The stub has the same endpoints and expectations as the real Defra Identity.
 
-### SonarCloud
+The simplest way to switch between the stub is to update your application to use the well known endpoint of the stub.
 
-Instructions for setting up SonarCloud can be found in [sonar-project.properties](./sonar-project.properties).
+For example, let's say your application has the following environment variables for a real Defra Identity instance.
+
+```
+DEFRA_ID_WELL_KNOWN_URL=https://your-account.cpdev.cui.defra.gov.uk/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration
+DEFRA_ID_CLIENT_ID=<your Client ID GUID>
+DEFRA_ID_CLIENT_SECRET=<Your Client Secret>
+DEFRA_ID_SERVICE_ID=<your Service ID GUID>
+DEFRA_ID_POLICY=b2c_1a_cui_cpdev_signupsigninsfi
+```
+
+Only the first environment variable needs to change, to repoint to the stub.
+
+```
+DEFRA_ID_WELL_KNOWN_URL=http://trade-imports-defra-id-stub:3007/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration
+DEFRA_ID_CLIENT_ID=<your Client ID GUID>
+DEFRA_ID_CLIENT_SECRET=<Your Client Secret>
+DEFRA_ID_SERVICE_ID=<your Service ID GUID>
+DEFRA_ID_POLICY=b2c_1a_cui_cpdev_signupsigninsfi
+```
+
+**IMPORTANT** if not running in the same Docker network as your app, then the host must be set as `host.docker.internal` to enable the containerised app access localhost.
+
+```
+DEFRA_ID_WELL_KNOWN_URL=http://host.docker.internal:3007/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration
+DEFRA_ID_CLIENT_ID=<your Client ID GUID>
+DEFRA_ID_CLIENT_SECRET=<Your Client Secret>
+DEFRA_ID_SERVICE_ID=<your Service ID GUID>
+DEFRA_ID_POLICY=b2c_1a_cui_cpdev_signupsigninsfi
+```
+
+Example Docker Compose file
+
+```yaml
+services:
+  my-app:
+    image: my-app
+    ports:
+      - "3000:3000"
+    environment:
+      DEFRA_ID_WELL_KNOWN_URL: ${DEFRA_ID_WELL_KNOWN_URL}
+      DEFRA_ID_CLIENT_ID: ${DEFRA_ID_CLIENT_ID}
+      DEFRA_ID_CLIENT_SECRET: ${DEFRA_ID_CLIENT_SECRET}
+      DEFRA_ID_SERVICE_ID: ${DEFRA_ID_SERVICE_ID}
+      DEFRA_ID_POLICY: ${DEFRA_ID_POLICY}
+    depends_on:
+      trade-imports-defra-id-stub:
+        condition: service_healthy
+
+  trade-imports-defra-id-stub:
+    image: defradigital/trade-imports-defra-id-stub
+    ports:
+      - "3007:3007"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3007/health"]
+      interval: 1m30s
+      timeout: 30s
+      retries: 5
+      start_period: 3s
+```
+
+### Trade Imports Defra Identity example
+
+The [Trade_Imports Defra Identity example repository](https://github.com/DEFRA/trade-imports-defra-id-example) includes the stub as part of it's Docker Compose setup for optional use.
+
+## CDP environments
+
+The stub is deployed to all CDP environments and can be used by any application.
+
+> Note: the deployed version uses the Basic authentication setup where any CRN is accepted and a basic list of organisations is provided.
+
+- [https://trade-imports-defra-id-stub.dev.cdp-int.defra.cloud](https://trade-imports-defra-id-stub.dev.cdp-int.defra.cloud)
+
+Example configuration file for CDP `dev` environment.
+
+```
+DEFRA_ID_WELL_KNOWN_URL=https://trade-imports-defra-id-stub.dev.cdp-int.defra.cloud/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration
+DEFRA_ID_CLIENT_ID=<your Client ID GUID>
+DEFRA_ID_CLIENT_SECRET=<Your Client Secret>
+DEFRA_ID_SERVICE_ID=<your Service ID GUID>
+DEFRA_ID_POLICY=b2c_1a_cui_cpdev_signupsigninsfi
+```
+
+> NOTE: CDP environments cannot be used from outside of CDP as the complex redirection url will be rejected.
+
+### Basic (Default)
+
+This option allows authentication of predefined 10 digit CRN and password to be successful.
+
+### Mock
+
+The option works the same as basic other than only a predefined list of mock CRNs are accepted.
+
+Each of the CRNs are associated with varying mock organisations.
+
+This allows for more variation of automated tests and scenarios.
+
+Current mock data available can be viewed [here](./src/data/mock.json).
+
+> NOTE: as per limitations above, mock data is limited.
+
+To enable this option set the `AUTH_MODE` environment variable to `mock`.
+
+### Simple override
+
+This option allows for a simple override of the default behaviour by providing a single CRN and organisation as a string environment variable.
+
+The provided CRN will be the only one permitted to authenticate and the provided organisation will be the only one available for selection.
+
+To enable this option set the `AUTH_OVERRIDE` environment variable to a string in the format `crn:firstName:lastName:organisationId:sbi:organisationName`.
+
+Where crn is 10 digits, firstName/lastName are letters and spaces, organisationId is a number, sbi is 9 digits, and organisationName can be anything
+
+This is validated against the following regular expression
+
+```javascript
+/^(\d{10}):([a-zA-Z\s]+):([a-zA-Z\s]+):(\d+):(\d{9}):(.+)$/
+```
+
+If this environment variable is provided, it will take precedence over Basic and Mock modes.
+
+To enable this option set the `AUTH_OVERRIDE_FILE` environment variable to the filename of the JSON file within the directory.
+
+For example: `AUTH_OVERRIDE_FILE: auth-override.json`
+
+If provided, this option will take precedence over the above methods.
+
+
+## Passing CRN and Password
+
+For demo and testing purposes only, the stub can be configured to accept the predefined CRN and Password to authorize.
+
+Where the minimum required parameters are:
+- `serviceId` - Your Service ID GUID
+- `client_id` - Your Client ID GUID
+- `redirect_uri` - Your callback URL (must be URL encoded)
+- `scope` - OAuth scope (e.g., `openid`)
+- `crn` - Customer Reference Number
+- `password` - Password
+
+## Further configuration
+
+### Setting an unsecure cookie
+
+The stub uses cookies to manage an authentication and SSO session.
+
+The cookie is secure by default, meaning it will only be sent over HTTPS or localhost.
+
+For scenarios where the stub is hosted on an HTTP domain other than localhost, the cookie can be set to unsecure by setting the `SECURE_COOKIE` environment variable to `false`.
+
+Example Docker Compose file
+
+```yaml
+services:
+  trade-imports-defra-id-stub:
+    image: defradigital/trade-imports-defra-id-stub
+    environment:
+      SECURE_COOKIE: false
+```
+
+> Note: when building from source using the provided Docker Compose file, this variable is already set to `false` by default so no action is required.
+
+## Testing
+
+To run the tests for the stub:
+
+```bash
+npm run docker:test
+```
+
+Tests can also be run in watch mode to support Test Driven Development (TDD):
+
+```bash
+npm run docker:test:watch
+```
 
 ## Licence
 

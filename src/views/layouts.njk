@@ -1,0 +1,123 @@
+{% extends "govuk/template.njk" %}
+
+{% from "govuk/components/service-navigation/macro.njk" import govukServiceNavigation %}
+{% from "govuk/components/phase-banner/macro.njk" import govukPhaseBanner %}
+
+
+{% set mainClasses = "app-main-wrapper" %}
+
+{% block head %}
+  <link href="{{ getAssetPath('stylesheets/application.scss') }}" rel="stylesheet">
+{% endblock %}
+
+{% block header %}
+  {{ govukHeader({
+    homepageUrl: "https://www.gov.uk/",
+    classes: "app-header",
+    containerClasses: "govuk-width-container",
+    serviceName: serviceName,
+    serviceUrl: serviceUrl,
+    useTudorCrown: true
+  }) }}
+  {% if s3Enabled and navigation %}
+    {% set navItems = [
+      {
+        href: "/",
+        text: "Overview",
+        active: navigation == 'overview'
+      },
+      {
+        href: "/s3",
+        text: "S3",
+        active: navigation == 's3'
+      }
+    ] %}
+    {% if entraEnabled %}
+      {% if auth and auth.isAuthenticated %}
+        {% set navItems = (navItems.push({
+          href: "/auth/sign-out",
+          text: "Sign out"
+        }), navItems) %}
+      {% else %}
+        {% set navItems = (navItems.push({
+          href: "/auth/sign-in",
+          text: "Sign in"
+        }), navItems) %}
+      {% endif %}
+    {% endif %}
+    {{ govukServiceNavigation({
+      navigation: navItems
+    }) }}
+  {% endif %}
+{% endblock %}
+
+{% block pageTitle %}
+  {% if pageTitle and pageTitle != serviceName %}{{ pageTitle }} - {% endif %}{{ serviceName }} - GOV.UK
+{% endblock %}
+
+{% block beforeContent %}
+  {% if authSource == 'basic' %}
+    {% set authSourceTag = {
+      text: "Basic",
+      classes: "govuk-tag--green"
+    } %}
+  {% elif authSource == 'mock' %}
+    {% set authSourceTag = {
+      text: "Mock",
+      classes: "govuk-tag--orange"
+    } %}
+  {% elif authSource == 'override' %}
+    {% set authSourceTag = {
+      text: "Override",
+      classes: "govuk-tag--red"
+    } %}
+  {% elif authSource == 'file' %}
+    {% set authSourceTag = {
+      text: "File",
+      classes: "govuk-tag--purple"
+    } %}
+  {% endif %}
+
+{#  {% set s3Status %}#}
+{#    {% if s3Enabled %}#}
+{#      <a class="govuk-link" href="/s3">S3 datasets enabled</a>.#}
+{#    {% else %}#}
+{#      S3 datasets disabled.#}
+{#    {% endif %}#}
+{#  {% endset %}#}
+
+  {{ govukPhaseBanner({
+    tag: authSourceTag,
+    html: s3Status
+  }) }}
+{% endblock %}
+
+{% block content %}{% endblock %}
+
+{% block footer %}
+  {{ govukFooter({
+    meta: {
+      items: [
+        {
+          href: "https://www.gov.uk/help/privacy-notice",
+          text: "Privacy"
+        },
+        {
+          href: "https://www.gov.uk/help/cookies",
+          text: "Cookies"
+        },
+        {
+          href: "https://www.gov.uk/help/accessibility",
+          text: "Accessibility statement"
+        }
+      ],
+      html: 'Built by the <a class="govuk-footer__link" href="https://www.gov.uk/government/organisations/department-for-environment-food-rural-affairs" target="_blank" rel="noopener noreferrer">
+            Department for Environment, Food & Rural Affairs
+          </a>'
+    }
+  }) }}
+{% endblock %}
+
+{% block bodyEnd %}
+  <script type="module" nonce="{{ nonce }}" src="{{ getAssetPath('application.js') }}"></script>
+{% endblock %}
