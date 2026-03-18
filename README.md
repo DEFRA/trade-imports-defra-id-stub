@@ -195,11 +195,11 @@ DEFRA_ID_POLICY=b2c_1a_cui_cpdev_signupsigninsfi
 
 ### Basic (Default)
 
-This option allows authentication of predefined 10 digit CRN and password to be successful.  
+This option allows authentication of predefined 10 digit CRN and password to be successful.
 
 ### Mock
 
-The option works the same as basic other than only a predefined list of mock CRNs are accepted. 
+The option works the same as basic other than only a predefined list of mock CRNs are accepted.
 
 Each of the CRNs are associated with varying mock organisations.
 

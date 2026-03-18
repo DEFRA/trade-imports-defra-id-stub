@@ -1,7 +1,7 @@
-# FCP Defra ID Stub - AI Coding Instructions
+# Trade Imports Defra ID Stub - AI Coding Instructions
 
 ## Project Overview
-Defra Identity authentication stub for Farming & Countryside Programme (FCP). Supports CRN/Password auth and optional Entra SSO. Returns signed JWT tokens consistent with Defra's `signupsigninsfi` policy.
+Defra Identity authentication stub for Trade Imports. Supports CRN/Password auth and optional Entra SSO. Returns signed JWT tokens consistent with Defra's `signupsigninsfi` policy.
 
 ## Architecture
 
@@ -50,7 +50,7 @@ Always check Entra flag before adding Entra-specific code.
 ### Running Locally
 ```bash
 # Build and run with Docker (preferred)
-npm run docker:dev  # runs on port 3007 (configurable via FCP_DEFRA_ID_STUB_PORT)
+npm run docker:dev  # runs on port 3007 (configurable via TRADE_IMPORTS_DEFRA_ID_STUB_PORT)
 
 # Local dev (watch mode, requires Redis/LocalStack)
 npm run dev  # runs frontend:watch & server:watch concurrently
