@@ -1,0 +1,113 @@
+{% extends "layouts.njk" %}
+
+{% from "govuk/components/summary-list/macro.njk" import govukSummaryList %}
+{% from "govuk/components/inset-text/macro.njk" import govukInsetText %}
+{% from "govuk/components/button/macro.njk" import govukButton %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-body">
+        <h1 class="govuk-heading-l">S3 client data</h1>
+
+        <p class="govuk-body">To support multiple teams and services using the same stub instance, client specific datasets can be uploaded to S3.</p>
+
+        <p class="govuk-body">If provided, these datasets will override the people and organisation data used in the stub for the specified Client ID.</p>
+
+        <p class="govuk-body">See <a href="https://github.com/DEFRA/trade-imports-defra-id-stub">GitHub</a> for full usage information.</p>
+
+        {% if auth and auth.isAuthenticated %}
+        <p class="govuk-body">
+          <a href="/s3/create" class="govuk-button" data-module="govuk-button">
+            Upload new dataset
+          </a>
+        </p>
+        {% endif %}
+
+      </div>
+    </div>
+
+    <div class="govuk-grid-column-full">
+      <div class="govuk-body">
+
+        <h2 class="govuk-heading-m">Active datasets by Client ID</h2>
+
+        {% if datasets.length == 0 %}
+          {{ govukInsetText({
+            text: "No datasets have been uploaded to S3 in this environment."
+          }) }}
+        {% else %}
+          {% for dataset in datasets %}
+
+            {% set statusHtml %}
+              {% if dataset.valid %}
+                <span class="govuk-tag govuk-tag--green">Valid</span>
+              {% else %}
+                <span class="govuk-tag govuk-tag--red">Invalid</span>
+              {% endif %}
+            {% endset %}
+
+            {% set cardActionsItems = [
+              {
+                href: "/s3/download?clientId=" + dataset.clientId + "&filename=" + dataset.filename,
+                text: "Download"
+              }
+            ] %}
+
+            {% if auth and auth.isAuthenticated %}
+              {% set cardActionsItems = (cardActionsItems.push({
+                href: "/s3/delete?clientId=" + dataset.clientId + "&filename=" + dataset.filename,
+                text: "Delete"
+              }), cardActionsItems) %}
+            {% endif %}
+
+            {{ govukSummaryList({
+              card: {
+                title: {
+                  text: dataset.clientId
+                }
+              },
+              rows: [
+                {
+                  key: {
+                    text: "Filename"
+                  },
+                  value: {
+                    text: dataset.filename
+                  },
+                  actions: {
+                    items: cardActionsItems
+                  }
+                },
+                {
+                  key: {
+                    text: "Last modified"
+                  },
+                  value: {
+                    html: dataset.lastModified
+                  }
+                },
+                {
+                  key: {
+                    text: "Status"
+                  },
+                  value: {
+                    html: statusHtml
+                  }
+                },
+                {
+                  key: {
+                    text: "Issues"
+                  },
+                  value: {
+                    text: dataset.errorMessage or 'No issues'
+                  }
+                }
+              ]
+            }) }}
+          {% endfor %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+{% endblock %}

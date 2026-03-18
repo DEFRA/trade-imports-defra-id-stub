@@ -1,98 +1,49 @@
-version: '3.4'
 services:
+  trade-imports-defra-id-stub:
+    build:
+      context: .
+      target: development
+    environment:
+      PORT: ${TRADE_IMPORTS_DEFRA_ID_STUB_PORT:-3007}
+      AUTH_MODE: ${AUTH_MODE:-basic}
+      AUTH_OVERRIDE: ${AUTH_OVERRIDE}
+      AUTH_OVERRIDE_FILE: ${AUTH_OVERRIDE_FILE}
+      AWS_REGION: eu-west-2
+      AWS_ENDPOINT_URL: http://localstack:4566
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_S3_ENABLED: $TRADE_IMPORTS_DEFRA_ID_STUB_AWS_S3_ENABLED:-true}
+      AWS_S3_BUCKET: trade-imports-defra-id-stub-data
+      ENTRA_ENABLED: ${ENTRA_ENABLED:-false}
+      ENTRA_WELL_KNOWN_URL: https://login.microsoftonline.com/${ENTRA_TENANT_ID}/v2.0/.well-known/openid-configuration
+      ENTRA_CLIENT_ID: ${ENTRA_CLIENT_ID}
+      ENTRA_CLIENT_SECRET: ${ENTRA_CLIENT_SECRET}
+      ENTRA_REDIRECT_URL: http://localhost:3007/auth/sign-in-oidc
+      ENTRA_SIGN_OUT_REDIRECT_URL: http://localhost:3007/auth/sign-out-oidc
+      REDIS_HOST: redis
+      COOKIE_PASSWORD: this-is-a-secret-that-must-be-at-least-32-characters
+      AUTH_PASSWORD: ${AUTH_PASSWORD:-null}
+    volumes:
+      - ./src:/home/node/src
+      - ./package.json:/home/node/package.json
+    depends_on:
+      localstack:
+        condition: service_healthy
 
   localstack:
-    image: localstack/localstack:3.0.2
-    ports:
-      - '4566:4566' # LocalStack Gateway
-      - '4510-4559:4510-4559' # external services port range
-    env_file:
-      - 'compose/aws.env'
+    image: localstack/localstack
     environment:
-      DEBUG: ${DEBUG:-1}
-      LS_LOG: WARN # Localstack DEBUG Level
-      SERVICES: s3,sqs,sns,firehose
-      LOCALSTACK_HOST: 127.0.0.1
-    volumes:
-      - '${TMPDIR:-/tmp}/localstack:/var/lib/localstack'
-      - ./compose/start-localstack.sh:/etc/localstack/init/ready.d/start-localstack.sh
+      LS_LOG: warn
+      SERVICES: s3
+      AWS_DEFAULT_REGION: eu-west-2
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      PERSISTENCE: 1
     healthcheck:
       test: ['CMD', 'curl', 'localhost:4566']
       interval: 5s
       start_period: 5s
       retries: 3
-    networks:
-      - cdp-tenant
 
   redis:
-    image: redis:7.2.3-alpine3.18
-    ports:
-      - '6379:6379'
-    restart: always
-    networks:
-      - cdp-tenant
-
-  mongodb:
-    image: mongo:6.0.13
-    networks:
-      - cdp-tenant
-    ports:
-      - '27017:27017'
-    volumes:
-      - mongodb-data:/data
-    restart: always
-
-################################################################################
-
-  your-frontend:
-    build: ./
-    ports:
-      - '3000:3000'
-    links:
-      - 'localstack:localstack'
-      - 'redis:redis'
-    depends_on:
-      localstack:
-        condition: service_healthy
-      redis:
-        condition: service_started
-    env_file:
-      - 'compose/aws.env'
-    environment:
-      PORT: 3000
-      NODE_ENV: development
-      REDIS_HOST: redis
-      LOCALSTACK_ENDPOINT: http://localstack:4566
-      USE_SINGLE_INSTANCE_CACHE: true
-    networks:
-      - cdp-tenant
-
-  # your-backend:
-  #   image: defradigital/your-backend:${YOUR_BACKEND_VERSION:-latest}
-  #   ports:
-  #     - '3555:3555'
-  #   links:
-  #     - 'localstack:localstack'
-  #     - 'mongodb:mongodb'
-  #   depends_on:
-  #     localstack:
-  #       condition: service_healthy
-  #     mongodb:
-  #       condition: service_started
-  #   env_file:
-  #     - 'compose/aws.env'
-  #   environment:
-  #     PORT: 3555
-  #     NODE_ENV: development
-  #     LOCALSTACK_ENDPOINT: http://localstack:4566
-  #   networks:
-  #     - cdp-tenant
-
-################################################################################
-
-volumes:
-  mongodb-data:
-
-networks:
-  cdp-tenant:
-    driver: bridge
+    image: redis

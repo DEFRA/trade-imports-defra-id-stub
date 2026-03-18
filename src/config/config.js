@@ -1,12 +1,10 @@
 import convict from 'convict'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-
 import convictFormatWithValidator from 'convict-format-with-validator'
 
 const dirname = path.dirname(fileURLToPath(import.meta.url))
 
-const fourHoursMs = 14400000
 const oneWeekMs = 604800000
 
 const isProduction = process.env.NODE_ENV === 'production'
@@ -32,8 +30,14 @@ export const config = convict({
   port: {
     doc: 'The port to bind.',
     format: 'port',
-    default: 3000,
+    default: 3007,
     env: 'PORT'
+  },
+  environment: {
+    doc: 'The environment the application is running in',
+    format: String,
+    default: 'local',
+    env: 'ENVIRONMENT'
   },
   staticCacheTimeout: {
     doc: 'Static cache timeout in milliseconds',
@@ -44,7 +48,7 @@ export const config = convict({
   serviceName: {
     doc: 'Applications Service Name',
     format: String,
-    default: 'trade-imports-defra-id-stub'
+    default: 'Trade Imports Defra ID stub'
   },
   root: {
     doc: 'Project root',
@@ -82,7 +86,7 @@ export const config = convict({
     level: {
       doc: 'Logging level',
       format: ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'],
-      default: 'info',
+      default: 'warn',
       env: 'LOG_LEVEL'
     },
     format: {
@@ -112,87 +116,11 @@ export const config = convict({
     default: isProduction,
     env: 'ENABLE_SECURE_CONTEXT'
   },
-  session: {
-    cache: {
-      engine: {
-        doc: 'backend cache is written to',
-        format: ['redis', 'memory'],
-        default: isProduction ? 'redis' : 'memory',
-        env: 'SESSION_CACHE_ENGINE'
-      },
-      name: {
-        doc: 'server side session cache name',
-        format: String,
-        default: 'session',
-        env: 'SESSION_CACHE_NAME'
-      },
-      ttl: {
-        doc: 'server side session cache ttl',
-        format: Number,
-        default: fourHoursMs,
-        env: 'SESSION_CACHE_TTL'
-      }
-    },
-    cookie: {
-      ttl: {
-        doc: 'Session cookie ttl',
-        format: Number,
-        default: fourHoursMs,
-        env: 'SESSION_COOKIE_TTL'
-      },
-      password: {
-        doc: 'session cookie password',
-        format: String,
-        default: 'the-password-must-be-at-least-32-characters-long',
-        env: 'SESSION_COOKIE_PASSWORD',
-        sensitive: true
-      },
-      secure: {
-        doc: 'set secure flag on cookie',
-        format: Boolean,
-        default: isProduction,
-        env: 'SESSION_COOKIE_SECURE'
-      }
-    }
-  },
-  redis: {
-    host: {
-      doc: 'Redis cache host',
-      format: String,
-      default: '127.0.0.1',
-      env: 'REDIS_HOST'
-    },
-    username: {
-      doc: 'Redis cache username',
-      format: String,
-      default: '',
-      env: 'REDIS_USERNAME'
-    },
-    password: {
-      doc: 'Redis cache password',
-      format: '*',
-      default: '',
-      sensitive: true,
-      env: 'REDIS_PASSWORD'
-    },
-    keyPrefix: {
-      doc: 'Redis cache key prefix name used to isolate the cached results across multiple clients',
-      format: String,
-      default: 'trade-imports-defra-id-stub:',
-      env: 'REDIS_KEY_PREFIX'
-    },
-    useSingleInstanceCache: {
-      doc: 'Connect to a single instance of redis instead of a cluster.',
-      format: Boolean,
-      default: !isProduction,
-      env: 'USE_SINGLE_INSTANCE_CACHE'
-    },
-    useTLS: {
-      doc: 'Connect to redis using TLS',
-      format: Boolean,
-      default: isProduction,
-      env: 'REDIS_TLS'
-    }
+  isMetricsEnabled: {
+    doc: 'Enable metrics reporting',
+    format: Boolean,
+    default: isProduction,
+    env: 'ENABLE_METRICS'
   },
   nunjucks: {
     watch: {
@@ -213,7 +141,241 @@ export const config = convict({
       default: 'x-cdp-request-id',
       env: 'TRACING_HEADER'
     }
+  },
+  cookie: {
+    name: {
+      doc: 'The name of the cookie to set',
+      format: String,
+      default: 'trade-imports-defra-id-stub-session',
+      env: 'COOKIE_NAME'
+    },
+    password: {
+      doc: 'The password used to encrypt the cookie',
+      format: String,
+      default: 'this-must-be-at-least-32-characters-long',
+      env: 'COOKIE_PASSWORD'
+    },
+    isSecure: {
+      doc: 'Is the cookie secure (only sent over HTTPS)',
+      format: Boolean,
+      default: isProduction,
+      env: 'SECURE_COOKIE'
+    }
+  },
+  aws: {
+    s3Enabled: {
+      doc: 'Is S3 enabled for data storage',
+      format: Boolean,
+      default: false,
+      env: 'AWS_S3_ENABLED'
+    },
+    region: {
+      doc: 'AWS region',
+      format: String,
+      default: 'eu-west-2',
+      env: 'AWS_REGION'
+    },
+    endpoint: {
+      doc: 'AWS endpoint URL, for example to use with LocalStack',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'AWS_ENDPOINT_URL'
+    },
+    accessKeyId: {
+      doc: 'AWS access key ID',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'AWS_ACCESS_KEY_ID'
+    },
+    secretAccessKey: {
+      doc: 'AWS secret access key',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'AWS_SECRET_ACCESS_KEY'
+    },
+    s3Bucket: {
+      doc: 'S3 bucket name, required if S3 is enabled',
+      format: String,
+      default: process.env.AWS_S3_ENABLED === 'true' ? null : '',
+      env: 'AWS_S3_BUCKET'
+    }
+  },
+  auth: {
+    mode: {
+      doc: 'The authentication mode to use',
+      format: ['basic', 'mock'],
+      default: 'basic',
+      env: 'AUTH_MODE'
+    },
+    override: {
+      doc: 'Override the available data to a specific customer and organisation in the format "crn:firstName:lastName:organisationId:sbi:organisationName"',
+      format: function (val) {
+        if (val === '') {
+          return
+        }
+
+        const regex = /^(\d{10}):([a-zA-Z\s]+):([a-zA-Z\s]+):(\d+):(\d{9}):(.+)$/
+
+        if (!regex.test(val)) {
+          throw new Error('Must be in format "crn:firstName:lastName:organisationId:sbi:organisationName" where crn is 10 digits, firstName/lastName are letters and spaces, organisationId is a number, sbi is 9 digits, and organisationName can be anything')
+        }
+      },
+      default: '',
+      env: 'AUTH_OVERRIDE'
+    },
+    overrideFile: {
+      doc: 'Path to the authentication file in json format.  Must be mounted at /data/*.json',
+      format: function (val) {
+        if (val === '') {
+          return
+        }
+
+        const regex = /^.+\.json$/
+
+        if (!regex.test(val)) {
+          throw new Error('Path must be in format "*.json"')
+        }
+      },
+      default: '',
+      env: 'AUTH_OVERRIDE_FILE'
+    },
+    password: {
+      doc: 'Shared password all users must enter when logging into the stub',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'AUTH_PASSWORD'
+    },
+    source: {
+      doc: 'Source of truth for authentication and user data',
+      format: String,
+      default: 'basic'
+    }
+  },
+  wellKnown: {
+    host: {
+      doc: 'Override the host domain in the well known configuration for any redirect URLs',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'WELL_KNOWN_HOST_OVERRIDE'
+    },
+    apiHost: {
+      doc: 'Override the host domain in the well known configuration for any API calls including token exchange',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'WELL_KNOWN_API_HOST_OVERRIDE'
+    }
+  },
+  loginDisabled: {
+    doc: 'Disable the login for all users rejecting all credentials',
+    format: Boolean,
+    default: false,
+    env: 'LOGIN_DISABLED'
+  },
+  allowLoginQueryParams: {
+    doc: 'Allow login using query parameters for crn and password, not supported in Defra ID and should only be used for demo/testing purposes',
+    format: Boolean,
+    default: true,
+    env: 'ALLOW_LOGIN_QUERY_PARAMS'
+  },
+  entra: {
+    enabled: {
+      doc: 'Enable Entra protected routes and authentication',
+      format: Boolean,
+      default: false,
+      env: 'ENTRA_ENABLED'
+    },
+    wellKnownUrl: {
+      doc: 'The Entra well known URL.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'ENTRA_WELL_KNOWN_URL'
+    },
+    clientId: {
+      doc: 'The Entra client ID.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'ENTRA_CLIENT_ID'
+    },
+    clientSecret: {
+      doc: 'The Entra client secret.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'ENTRA_CLIENT_SECRET'
+    },
+    redirectUrl: {
+      doc: 'The Entra redirect URl.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'ENTRA_REDIRECT_URL'
+    },
+    signOutRedirectUrl: {
+      doc: 'The Entra sign out redirect URl.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'ENTRA_SIGN_OUT_REDIRECT_URL'
+    },
+    refreshTokens: {
+      doc: 'True if Entra refresh tokens are enabled.',
+      format: Boolean,
+      default: true,
+      env: 'ENTRA_REFRESH_TOKENS'
+    }
+  },
+  redis: {
+    host: {
+      doc: 'The Redis cache host.',
+      format: String,
+      nullable: true,
+      default: null,
+      env: 'REDIS_HOST'
+    },
+    username: {
+      doc: 'The Redis cache username.',
+      format: String,
+      default: '',
+      env: 'REDIS_USERNAME'
+    },
+    password: {
+      doc: 'The Redis cache password.',
+      format: '*',
+      default: process.env.NODE_ENV === 'production' ? null : undefined,
+      sensitive: true,
+      env: 'REDIS_PASSWORD'
+    },
+    keyPrefix: {
+      doc: 'Redis cache key prefix name used to isolate the cached results across multiple clients',
+      format: String,
+      default: 'trade-imports-defra-id-stub:',
+      env: 'REDIS_KEY_PREFIX'
+    },
+    useSingleInstanceCache: {
+      doc: 'Connect to a single instance of redis instead of a cluster.',
+      format: Boolean,
+      default: !isProduction,
+      env: 'USE_SINGLE_INSTANCE_CACHE'
+    },
+    useTLS: {
+      doc: 'Connect to redis using TLS',
+      format: Boolean,
+      default: isProduction,
+      env: 'REDIS_TLS'
+    },
+    ttl: {
+      doc: 'The cache TTL.',
+      format: Number,
+      default: 1000 * 60 * 60 * 24,
+      env: 'REDIS_TTL'
+    }
   }
 })
-
-config.validate({ allowed: 'strict' })

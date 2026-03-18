@@ -1,0 +1,83 @@
+{% extends 'layouts.njk' %}
+
+{% from "govuk/components/button/macro.njk" import govukButton %}
+{% from "govuk/components/warning-text/macro.njk" import govukWarningText %}
+{% from "govuk/components/input/macro.njk" import govukInput %}
+{% from "govuk/components/details/macro.njk" import govukDetails %}
+
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <form method="POST" action="/dcidmtest.onmicrosoft.com/oauth2/authresp">
+        <h1 class="govuk-heading-l">Sign in using Government Gateway</h1>
+        {% if message %}
+          <div class="govuk-error-summary" aria-labelledby="error-summary-title" role="alert" tabindex="-1" data-module="govuk-error-summary">
+            <h2 class="govuk-error-summary__title" id="error-summary-title">
+              There is a problem
+            </h2>
+            <div class="govuk-error-summary__body">
+              <ul class="govuk-list govuk-error-summary__list">
+                <span class="govuk-error-message">
+                  <span class="govuk-visually-hidden">Error:</span>
+                  {{ message }}
+                </span>
+              </ul>
+            </div>
+          </div>
+        {% endif %}
+
+        {{ govukInput({
+          label: {
+            text: "Government Gateway user ID"
+          },
+          classes: "govuk-input--width-20",
+          hint: {
+            text: "This could be up to 12 characters."
+          },
+          name: "crn",
+          value: crn
+        }) }}
+
+        {{ govukInput({
+          label: {
+            text: "Password"
+          },
+          classes: "govuk-input--width-20",
+          type: "password",
+          name: "password",
+          value: password
+        }) }}
+
+        {{ govukButton({
+          text: "Sign in",
+          id: "submit"
+        }) }}
+
+      </form>
+
+      <p class="govuk-body"><a class="govuk-link" href="#">I have forgotten my password</a></p>
+
+      {{ govukDetails({
+        summaryText: "Help signing in",
+        html: '
+          <p class="govuk-body">Contact the Rural Payments Agency by email or phone if:</p>
+
+          <ul class="govuk-list govuk-list--bullet">
+            <li>you have forgotten your CRN</li>
+            <li>you have lost your CRN</li>
+            <li>your CRN is not recognised</li>
+          </ul>
+
+          <p class="govuk-body">Email:<br><a class="govuk-link" href="mailto:testing@farming.gov.uk">testing@farming.gov.uk</a></p>
+          <p class="govuk-body">Telephone:<br>0300 000 0000</p>
+          <p class="govuk-body">Service opening times:<br>09:00 AM to 05:00 PM</p>
+
+          <p class="govuk-body"><a class="govuk-link" href="https://www.gov.uk/call-charges" target="_blank">Find out about call charges (opens in new tab)</a></p>
+
+          <p class="govuk-body"><a class="govuk-link" href="https://www.ruralpayments.service.gov.uk">Register with the Rural Payments service</a> if you do not have an account.</p>
+        '
+      }) }}
+    </div>
+  </div>
+{% endblock %}

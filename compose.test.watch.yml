@@ -1,0 +1,3 @@
+services:
+  trade-imports-defra-id-stub:
+    command: npm run test:watch

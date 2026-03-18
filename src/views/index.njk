@@ -1,0 +1,45 @@
+{% extends "layouts.njk" %}
+
+{% block content %}
+  <div class="govuk-grid-row">
+    <div class="govuk-grid-column-two-thirds">
+      <div class="govuk-body">
+        <h1 class="govuk-heading-l">{{ serviceName }}</h1>
+
+        <p class="govuk-body">Defra Identity stub for Trade Imports.</p>
+        <p class="govuk-body">This stub enables teams working within Trade Imports to develop and test against Defra Identity using the <strong>signupsigninsfi</strong> policy.</p>
+
+        <h2 class="govuk-heading-m">Supported Defra Identity features</h2>
+
+        <ul class="govuk-list govuk-list--bullet govuk-list--spaced">
+          <li>CRN/Password authentication</li>
+          <li>Exposes all Defra ID endpoints including well-known endpoints</li>
+          <li>Organisation selection</li>
+          <li>Signed JWT token generation consistent with <strong>signupsigninsfi</strong> policy</li>
+          <li>Token exchange from authorisation</li>
+          <li>Refresh token exchange</li>
+          <li>Single Sign-On (SSO) support (Session lasts one hour, extended on each re-authentication/organisation change)</li>
+          <li>Sign out including ending SSO session</li>
+          <li>Prevent sign in if no organisations associated with account</li>
+          <li>Automatically bypass organisation selection if CRN is associated with only one organisation.</li>
+          <li>Supports all Defra ID authentication behaviours including:
+            <ul class="govuk-list govuk-list--bullet govuk-list--spaced">
+              <li>Force re-authentication with <strong>prompt=login</strong> parameter</li>
+              <li>Bypass organisation selection with <strong>relationshipId=&lt;OrganisationId&gt;</strong> parameter</li>
+              <li>Force organisation selection with <strong>forceReselection=true</strong> parameter</li>
+            </ul>
+          </li>
+        </ul>
+
+        <p class="govuk-body">See <a href="https://github.com/DEFRA/trade-imports-defra-id-stub">GitHub</a> for full usage information.</p>
+
+        {% if s3Enabled and entraEnabled %}
+        <h2 class="govuk-heading-m">Data management</h2>
+
+        <p class="govuk-body">To support multiple teams and services sharing this stub, client-specific datasets can be uploaded to S3 to override the default people and organisation data per Client ID.</p>
+
+        <p class="govuk-body">To manage datasets, you must sign in with an Entra account that has the <strong>S3.Amend</strong> role in the Defra ID stub App Registration. Once signed in, you can upload or delete datasets from the <a href="/s3" class="govuk-link">S3 datasets page</a>.</p>
+        {% endif %}
+      </div>
+  </div>
+{% endblock %}
