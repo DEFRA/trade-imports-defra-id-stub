@@ -18,16 +18,16 @@ describe('getStorageDirectory', () => {
     mockExists.mockReturnValue(true)
   })
 
-  test('should return storage directory path', () => {
+  test('should return the configured storage directory path', () => {
     const dir = getStorageDirectory()
-    expect(dir).toBe('/home/node/keys')
+    expect(dir).toBe('./.test-keys')
   })
 
   test('should create storage directory if it does not exist', () => {
     mockExists.mockReturnValue(false)
     getStorageDirectory()
     expect(mockMkdir).toHaveBeenCalledTimes(1)
-    expect(mockMkdir).toHaveBeenCalledWith('/home/node/keys', { recursive: true })
+    expect(mockMkdir).toHaveBeenCalledWith('./.test-keys', { recursive: true })
   })
 
   test('should not create storage directory if it exists', () => {

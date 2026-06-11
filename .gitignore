@@ -11,3 +11,4 @@ coverage
 tsconfig.tsbuildinfo
 .env
 keys/
+.test-keys/

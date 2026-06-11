@@ -12,10 +12,6 @@
     "build:frontend": "NODE_ENV=production webpack",
     "dev": "npm run frontend:watch & npm run server:watch wait",
     "dev:debug": "npm run frontend:watch & server:debug wait",
-    "docker:build": "docker compose build",
-    "docker:dev": "docker compose up",
-    "docker:test": "npm run lint && mkdir -p coverage 2>/dev/null || true && docker compose -p trade-imports-defra-id-stub-test down -v && docker compose -f compose.yml -f compose.test.yml -p trade-imports-defra-id-stub-test run --build --rm trade-imports-defra-id-stub",
-    "docker:test:watch": "docker compose -p trade-imports-defra-id-stub-test down -v && docker compose -f compose.yml -f compose.test.yml -f compose.test.watch.yml -p trade-imports-defra-id-stub-test run --build --rm trade-imports-defra-id-stub",
     "frontend:watch": "NODE_ENV=development webpack --watch",
     "git:pre-commit-hook": "npm run lint:fix",
     "lint": "eslint",
@@ -27,6 +23,7 @@
     "setup:husky": "node -e \"try { (await import('husky')).default() } catch (e) { if (e.code !== 'ERR_MODULE_NOT_FOUND') throw e }\" --input-type module",
     "start": "NODE_ENV=production node --use-strict .",
     "test": "TZ=UTC vitest run --coverage",
+    "test:integration:local": "TZ=UTC LOCAL_INTEGRATION=1 vitest run test/integration/local",
     "test:watch": "TZ=UTC vitest"
   },
   "author": "Defra DDTS",

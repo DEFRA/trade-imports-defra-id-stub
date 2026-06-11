@@ -249,6 +249,12 @@ export const config = convict({
       default: null,
       env: 'AUTH_PASSWORD'
     },
+    keysDirectory: {
+      doc: 'Directory where generated signing keys and session data are stored',
+      format: String,
+      default: '/home/node/keys',
+      env: 'KEYS_DIRECTORY'
+    },
     source: {
       doc: 'Source of truth for authentication and user data',
       format: String,

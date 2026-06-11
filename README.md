@@ -42,19 +42,20 @@ Docker can be installed from [Docker's official website](https://docs.docker.com
 
 ### Run from source
 
-After cloning the repository, run the below commands to start the container.
+After cloning the repository, run the below commands to start the stub
+directly.
 
-By default, the application will run on port 3007.  However, this can be overridden by setting the `TRADE_IMPORTS_DEFRA_ID_STUB_PORT` environment variable.
+By default, the application will run on port 3007. However, this can be
+overridden by setting the `PORT` environment variable.
 
 ```bash
-# Build the image
-docker compose build
-
-# Run the application
-npm run docker:dev
+npm ci
+npm run build:frontend
+npm run dev
 ```
 
-A `.env` will automatically be read by the Docker compose files allowing to customise the data available.
+Data can be customised via environment variables (e.g. in a `.env` read by
+your shell):
 
 ```
 AUTH_MODE=mock
@@ -62,7 +63,10 @@ AUTH_OVERRIDE=9999999999:John:Watson:9999999:888888888:John Watson & Co.
 AUTH_OVERRIDE_FILE=example.data.json
 ```
 
-> NOTE: if providing a different custom, file the [`compose.override.yml`](./compose.override.yml) file volume may need updating.
+The stub also runs as part of the trade-imports-animals workspace stack
+([DEFRA/trade-imports-animals-workspace](https://github.com/DEFRA/trade-imports-animals-workspace)),
+which starts it from the published image alongside the rest of the services:
+`./scripts/stack/run-stack.sh` from the workspace root.
 
 ### Docker
 
@@ -268,20 +272,28 @@ services:
       SECURE_COOKIE: false
 ```
 
-> Note: when building from source using the provided Docker Compose file, this variable is already set to `false` by default so no action is required.
-
 ## Testing
 
-To run the tests for the stub:
+To run the tests for the stub (build the frontend assets first — the
+static-file tests serve them):
 
 ```bash
-npm run docker:test
+npm run build:frontend
+npm test
 ```
 
 Tests can also be run in watch mode to support Test Driven Development (TDD):
 
 ```bash
-npm run docker:test:watch
+npm run test:watch
+```
+
+The S3 data tests under `test/integration/local/` need a real S3 endpoint and
+are excluded from `npm test`. With the workspace stack's localstack running
+(`./scripts/stack/run-stack.sh` from the workspace root), run them with:
+
+```bash
+npm run test:integration:local
 ```
 
 ## Licence
