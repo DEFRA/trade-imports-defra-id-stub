@@ -8,14 +8,14 @@ process.env.AWS_S3_ENABLED = 'true'
 const { constants: httpConstants } = http2
 const { HTTP_STATUS_OK, HTTP_STATUS_BAD_REQUEST, HTTP_STATUS_NOT_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR, HTTP_STATUS_FORBIDDEN, HTTP_STATUS_FOUND } = httpConstants
 
-vi.mock('../../../../src/data/s3.js', () => ({
+vi.mock('../../../src/data/s3.js', () => ({
   getS3Datasets: vi.fn(),
   downloadS3File: vi.fn(),
   uploadS3File: vi.fn(),
   deleteS3File: vi.fn()
 }))
 
-vi.mock('../../../../src/common/helpers/logging/logger.js', () => ({
+vi.mock('../../../src/common/helpers/logging/logger.js', () => ({
   createLogger: () => ({
     error: vi.fn(),
     info: vi.fn(),
@@ -43,7 +43,7 @@ const mockDatasets = [
 
 const mockFileContent = 'test file content'
 
-const { getS3Datasets, downloadS3File, uploadS3File, deleteS3File } = await import('../../../../src/data/s3.js')
+const { getS3Datasets, downloadS3File, uploadS3File, deleteS3File } = await import('../../../src/data/s3.js')
 
 function buildMultipartPayload ({ clientId, filename, fileContent }) {
   const boundary = 'testboundary'
@@ -73,7 +73,7 @@ describe('s3 routes', () => {
   let server
 
   beforeAll(async () => {
-    const { createServer } = await import('../../../../src/server.js')
+    const { createServer } = await import('../../../src/server.js')
     server = await createServer()
     await server.initialize()
   })
@@ -248,7 +248,7 @@ describe('s3 routes (protected routes with Entra)', () => {
     vi.resetModules()
 
     // Import createServer after resetting modules and setting env vars
-    const { createServer } = await import('../../../../src/server.js')
+    const { createServer } = await import('../../../src/server.js')
     server = await createServer()
     await server.initialize()
   })

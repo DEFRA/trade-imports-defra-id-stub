@@ -274,8 +274,8 @@ services:
 
 ## Testing
 
-To run the tests for the stub (build the frontend assets first — the
-static-file tests serve them):
+A single `npm test` runs the whole suite — unit and integration together.
+Build the frontend assets first, as the static-file tests serve them:
 
 ```bash
 npm run build:frontend
@@ -288,7 +288,7 @@ Tests can also be run in watch mode to support Test Driven Development (TDD):
 npm run test:watch
 ```
 
-The S3 data tests under `test/integration/local/` run as part of `npm test` —
+The S3 data tests under `test/integration/data/` run as part of `npm test` —
 they spin up their own LocalStack via [Testcontainers](https://testcontainers.com/)
 on a dynamic port, so no separate stack is needed. **Docker must be running** for
 them to pass.

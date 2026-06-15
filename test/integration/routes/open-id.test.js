@@ -1,19 +1,19 @@
 import { vi, describe, beforeAll, beforeEach, afterAll, test, expect } from 'vitest'
 import http2 from 'node:http2'
 import '../helpers/setup-server-mocks.js'
-import { AUTH_REQUEST } from '../../../../src/config/constants/cache-keys.js'
+import { AUTH_REQUEST } from '../../../src/config/constants/cache-keys.js'
 
-vi.mock('../../../../src/open-id/well-known.js')
-vi.mock('../../../../src/auth/token.js')
-vi.mock('../../../../src/auth/session.js')
-vi.mock('../../../../src/auth/keys.js')
+vi.mock('../../../src/open-id/well-known.js')
+vi.mock('../../../src/auth/token.js')
+vi.mock('../../../src/auth/session.js')
+vi.mock('../../../src/auth/keys.js')
 
-const { getWellKnown } = await import('../../../../src/open-id/well-known.js')
-const { getTokens } = await import('../../../../src/auth/token.js')
-const { endSession } = await import('../../../../src/auth/session.js')
-const { getPublicKeys } = await import('../../../../src/auth/keys.js')
+const { getWellKnown } = await import('../../../src/open-id/well-known.js')
+const { getTokens } = await import('../../../src/auth/token.js')
+const { endSession } = await import('../../../src/auth/session.js')
+const { getPublicKeys } = await import('../../../src/auth/keys.js')
 
-const { createServer } = await import('../../../../src/server.js')
+const { createServer } = await import('../../../src/server.js')
 
 const { constants: httpConstants } = http2
 const { HTTP_STATUS_OK, HTTP_STATUS_FOUND, HTTP_STATUS_BAD_REQUEST } = httpConstants

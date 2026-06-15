@@ -1,8 +1,8 @@
 import { beforeAll, beforeEach, afterAll, describe, test, expect } from 'vitest'
 import { S3Client, CreateBucketCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, DeleteBucketCommand } from '@aws-sdk/client-s3'
 import { LocalstackContainer } from '@testcontainers/localstack'
-import { getLatestS3Data, getS3Datasets, downloadS3File, uploadS3File, deleteS3File } from '../../../../src/data/s3.js'
-import { config } from '../../../../src/config/config.js'
+import { getLatestS3Data, getS3Datasets, downloadS3File, uploadS3File, deleteS3File } from '../../../src/data/s3.js'
+import { config } from '../../../src/config/config.js'
 
 const { s3Bucket, region, accessKeyId, secretAccessKey } = config.get('aws')
 
