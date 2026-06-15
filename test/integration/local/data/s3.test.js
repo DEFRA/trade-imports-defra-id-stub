@@ -1,9 +1,10 @@
 import { beforeAll, beforeEach, afterAll, describe, test, expect } from 'vitest'
 import { S3Client, CreateBucketCommand, PutObjectCommand, DeleteObjectCommand, ListObjectsV2Command, DeleteBucketCommand } from '@aws-sdk/client-s3'
+import { LocalstackContainer } from '@testcontainers/localstack'
 import { getLatestS3Data, getS3Datasets, downloadS3File, uploadS3File, deleteS3File } from '../../../../src/data/s3.js'
 import { config } from '../../../../src/config/config.js'
 
-const { s3Bucket, region, endpoint, accessKeyId, secretAccessKey } = config.get('aws')
+const { s3Bucket, region, accessKeyId, secretAccessKey } = config.get('aws')
 
 const validPeopleData = {
   people: [
@@ -33,9 +34,19 @@ const invalidPeopleData = {
 }
 
 let s3Client
+let localstack
 
 describe('s3 data functions (local integration)', () => {
   beforeAll(async () => {
+    // Self-contained LocalStack on a random mapped port — no external stack.
+    // Inject the dynamic endpoint into config so the production s3 client
+    // (built lazily) targets this container.
+    localstack = await new LocalstackContainer('localstack/localstack:3')
+      .withEnvironment({ SERVICES: 's3' })
+      .start()
+    const endpoint = localstack.getConnectionUri()
+    config.set('aws.endpoint', endpoint)
+
     s3Client = new S3Client({
       region,
       endpoint,
@@ -50,7 +61,7 @@ describe('s3 data functions (local integration)', () => {
         console.warn(`Error creating bucket: ${error.message}`)
       }
     }
-  })
+  }, 180_000)
 
   beforeEach(async () => {
     await cleanupTestData()
@@ -63,7 +74,8 @@ describe('s3 data functions (local integration)', () => {
     } catch (error) {
       console.warn(`Error deleting bucket: ${error.message}`)
     }
-  })
+    await localstack.stop()
+  }, 60_000)
 
   async function cleanupTestData () {
     try {

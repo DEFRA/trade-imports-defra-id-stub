@@ -288,13 +288,10 @@ Tests can also be run in watch mode to support Test Driven Development (TDD):
 npm run test:watch
 ```
 
-The S3 data tests under `test/integration/local/` need a real S3 endpoint and
-are excluded from `npm test`. With the workspace stack's localstack running
-(`./scripts/stack/run-stack.sh` from the workspace root), run them with:
-
-```bash
-npm run test:integration:local
-```
+The S3 data tests under `test/integration/local/` run as part of `npm test` —
+they spin up their own LocalStack via [Testcontainers](https://testcontainers.com/)
+on a dynamic port, so no separate stack is needed. **Docker must be running** for
+them to pass.
 
 ## Licence
 
