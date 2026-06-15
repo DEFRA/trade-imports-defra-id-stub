@@ -68,9 +68,8 @@ AWS_S3_ENABLED=true
 ### Testing
 ```bash
 npm run build:frontend  # once — the static-file tests serve the webpack output
-npm test  # run once with coverage
+npm test  # run once with coverage (Docker must be running — the S3 integration test spins up its own LocalStack via Testcontainers)
 npm run test:watch  # watch mode for TDD
-npm run test:integration:local  # S3 data tests, needs the workspace stack's localstack
 ```
 
 **Integration tests** use `server.inject()` pattern (see [test/integration/narrow/routes/entra-auth.test.js](test/integration/narrow/routes/entra-auth.test.js)):
