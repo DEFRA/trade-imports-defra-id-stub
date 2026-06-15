@@ -49,10 +49,10 @@ Always check Entra flag before adding Entra-specific code.
 
 ### Running Locally
 ```bash
-# Build and run with Docker (preferred)
-npm run docker:dev  # runs on port 3007 (configurable via TRADE_IMPORTS_DEFRA_ID_STUB_PORT)
+# Full stack (preferred) — run from the workspace root
+./scripts/stack/run-stack.sh -d  # builds + runs every service from local source
 
-# Local dev (watch mode, requires Redis/LocalStack)
+# This service alone in watch mode (needs Redis/LocalStack, e.g. from the stack)
 npm run dev  # runs frontend:watch & server:watch concurrently
 ```
 
