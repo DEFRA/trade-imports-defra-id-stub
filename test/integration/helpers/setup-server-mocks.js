@@ -12,7 +12,7 @@ vi.mock('@hapi/catbox-redis', async () => {
   return CatboxMemory
 })
 
-vi.mock('../../../../src/entra/get-oidc-config.js', async () => {
+vi.mock('../../../src/entra/get-oidc-config.js', async () => {
   return {
     getOidcConfig: async () => (mockOidcConfig)
   }

@@ -1,17 +1,17 @@
 import { vi, describe, beforeAll, beforeEach, afterAll, test, expect } from 'vitest'
 import http2 from 'node:http2'
-import { AUTH_REQUEST, AUTHENTICATED, ORGANISATION_ID, PERSON, RELATIONSHIPS, ROLES } from '../../../../src/config/constants/cache-keys.js'
+import { AUTH_REQUEST, AUTHENTICATED, ORGANISATION_ID, PERSON, RELATIONSHIPS, ROLES } from '../../../src/config/constants/cache-keys.js'
 import '../helpers/setup-server-mocks.js'
 
-vi.mock('../../../../src/auth/credentials.js')
-vi.mock('../../../../src/auth/token.js')
-vi.mock('../../../../src/data/people.js')
+vi.mock('../../../src/auth/credentials.js')
+vi.mock('../../../src/auth/token.js')
+vi.mock('../../../src/data/people.js')
 
-const { validateCredentials } = await import('../../../../src/auth/credentials.js')
-const { createTokens } = await import('../../../../src/auth/token.js')
-const { getPerson, getOrganisations, getSelectedOrganisation } = await import('../../../../src/data/people.js')
+const { validateCredentials } = await import('../../../src/auth/credentials.js')
+const { createTokens } = await import('../../../src/auth/token.js')
+const { getPerson, getOrganisations, getSelectedOrganisation } = await import('../../../src/data/people.js')
 
-const { createServer } = await import('../../../../src/server.js')
+const { createServer } = await import('../../../src/server.js')
 
 const { constants: httpConstants } = http2
 const { HTTP_STATUS_OK, HTTP_STATUS_FOUND, HTTP_STATUS_BAD_REQUEST } = httpConstants
@@ -141,7 +141,7 @@ describe('auth routes', () => {
     })
 
     test('GET should not allow crn and password to be set from session if toggle is disabled', async () => {
-      const { config } = await import('../../../../src/config/config.js')
+      const { config } = await import('../../../src/config/config.js')
       config.set('allowLoginQueryParams', false)
 
       authRequest.crn = '1234567890'

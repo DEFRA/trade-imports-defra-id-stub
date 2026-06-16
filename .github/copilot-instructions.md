@@ -49,10 +49,10 @@ Always check Entra flag before adding Entra-specific code.
 
 ### Running Locally
 ```bash
-# Build and run with Docker (preferred)
-npm run docker:dev  # runs on port 3007 (configurable via TRADE_IMPORTS_DEFRA_ID_STUB_PORT)
+# Full stack (preferred) — run from the workspace root
+./scripts/stack/run-stack.sh -d  # builds + runs every service from local source
 
-# Local dev (watch mode, requires Redis/LocalStack)
+# This service alone in watch mode (needs Redis/LocalStack, e.g. from the stack)
 npm run dev  # runs frontend:watch & server:watch concurrently
 ```
 
@@ -67,14 +67,14 @@ AWS_S3_ENABLED=true
 
 ### Testing
 ```bash
-npm run docker:test  # run once with coverage
-npm run docker:test:watch  # watch mode for TDD
-npm test  # local (requires Docker services)
+npm run build:frontend  # once — the static-file tests serve the webpack output
+npm test  # whole suite (unit + integration) once with coverage; Docker must be running — the S3 integration test spins up its own LocalStack via Testcontainers
+npm run test:watch  # watch mode for TDD
 ```
 
-**Integration tests** use `server.inject()` pattern (see [test/integration/narrow/routes/entra-auth.test.js](test/integration/narrow/routes/entra-auth.test.js)):
+**Integration tests** use `server.inject()` pattern (see [test/integration/routes/entra-auth.test.js](test/integration/routes/entra-auth.test.js)):
 ```javascript
-const { createServer } = await import('../../../../src/server.js')
+const { createServer } = await import('../../../src/server.js')
 let server = await createServer()
 await server.initialize()  // NOT server.start() - keeps in-memory
 const response = await server.inject({ url: '/path', auth: { strategy: 'entra', credentials } })
@@ -87,8 +87,7 @@ vi.mock('../module.js', () => ({ exportName: mockFn }))
 ```
 
 Tests organized:
-- `test/integration/narrow/` - isolated route/plugin tests
-- `test/integration/local/` - full-stack LocalStack tests
+- `test/integration/` - integration tests: route/plugin tests via `server.inject()`, plus S3 data tests against Testcontainers LocalStack
 - `test/unit/` - pure unit tests
 
 ### Linting

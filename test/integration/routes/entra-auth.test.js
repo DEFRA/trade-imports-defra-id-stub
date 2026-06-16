@@ -5,22 +5,22 @@ import { mockOidcConfig } from '../helpers/setup-server-mocks.js'
 const { HTTP_STATUS_FOUND, HTTP_STATUS_INTERNAL_SERVER_ERROR } = constants
 
 const mockVerifyToken = vi.fn()
-vi.mock('../../../../src/auth/verify-token.js', async () => ({
+vi.mock('../../../src/auth/verify-token.js', async () => ({
   verifyToken: mockVerifyToken
 }))
 
 const mockGetSafeRedirect = vi.fn()
-vi.mock('../../../../src/utils/get-safe-redirect.js', () => ({
+vi.mock('../../../src/utils/get-safe-redirect.js', () => ({
   getSafeRedirect: mockGetSafeRedirect
 }))
 
 const mockGetSignOutUrl = vi.fn()
-vi.mock('../../../../src/auth/get-sign-out-url.js', () => ({
+vi.mock('../../../src/auth/get-sign-out-url.js', () => ({
   getSignOutUrl: mockGetSignOutUrl
 }))
 
 const mockValidateState = vi.fn()
-vi.mock('../../../../src/auth/state.js', () => ({
+vi.mock('../../../src/auth/state.js', () => ({
   createState: vi.fn(),
   validateState: mockValidateState
 }))
@@ -73,7 +73,7 @@ describe('entra auth routes', () => {
     vi.resetModules()
 
     // Import createServer after resetting modules and setting env vars
-    const { createServer } = await import('../../../../src/server.js')
+    const { createServer } = await import('../../../src/server.js')
     server = await createServer()
     await server.initialize()
   })
@@ -150,7 +150,7 @@ describe('entra auth routes', () => {
       Bell.simulate(() => {})
 
       // Because this needs to be set before the server is created, we'll create a new server instance to avoid conflicts with the existing tests
-      const { createServer: createBellSimulatedServer } = await import('../../../../src/server.js')
+      const { createServer: createBellSimulatedServer } = await import('../../../src/server.js')
       const bellSimulatedServer = await createBellSimulatedServer()
       await bellSimulatedServer.initialize()
 

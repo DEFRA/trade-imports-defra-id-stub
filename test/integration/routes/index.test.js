@@ -2,7 +2,7 @@ import { describe, beforeAll, afterAll, test, expect, vi } from 'vitest'
 import http2 from 'node:http2'
 import '../helpers/setup-server-mocks.js'
 
-const { createServer } = await import('../../../../src/server.js')
+const { createServer } = await import('../../../src/server.js')
 
 const { constants: httpConstants } = http2
 const { HTTP_STATUS_OK } = httpConstants
@@ -49,7 +49,7 @@ describe('index route (with S3 enabled)', () => {
     process.env.AWS_S3_ENABLED = 'true'
     vi.resetModules()
 
-    const { createServer: createServerS3 } = await import('../../../../src/server.js')
+    const { createServer: createServerS3 } = await import('../../../src/server.js')
     server = await createServerS3()
     await server.initialize()
   })
@@ -87,7 +87,7 @@ describe('index route (with S3 disabled)', () => {
     process.env.AWS_S3_ENABLED = 'false'
     vi.resetModules()
 
-    const { createServer: createServerNoS3 } = await import('../../../../src/server.js')
+    const { createServer: createServerNoS3 } = await import('../../../src/server.js')
     server = await createServerNoS3()
     await server.initialize()
   })

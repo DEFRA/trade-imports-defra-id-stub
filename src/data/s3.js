@@ -3,23 +3,28 @@ import { config } from '../config/config.js'
 import { createLogger } from '../common/helpers/logging/logger.js'
 import { schema } from './schema.js'
 
-const { s3Enabled, s3Bucket, region, endpoint, accessKeyId, secretAccessKey } = config.get('aws')
+const { s3Bucket } = config.get('aws')
 const logger = createLogger()
 
-let s3Client = null
-
-if (s3Enabled) {
-  s3Client = new S3Client({
-    region,
-    ...(endpoint && {
-      endpoint,
-      forcePathStyle: true,
-      credentials: { accessKeyId, secretAccessKey }
-    })
-  })
-}
+// Built lazily on first use (not at import) so tests can inject a dynamic
+// endpoint — e.g. a Testcontainers LocalStack on a random port — via
+// config.set('aws.endpoint', ...) before the first S3 call.
+let s3Client
 
 function getClient () {
+  if (s3Client === undefined) {
+    const { s3Enabled, region, endpoint, accessKeyId, secretAccessKey } = config.get('aws')
+    s3Client = s3Enabled
+      ? new S3Client({
+        region,
+        ...(endpoint && {
+          endpoint,
+          forcePathStyle: true,
+          credentials: { accessKeyId, secretAccessKey }
+        })
+      })
+      : null
+  }
   return s3Client
 }
 
@@ -29,7 +34,7 @@ async function listObjects ({ prefix, delimiter = '/' } = {}) {
     ...(prefix && { Prefix: prefix }),
     Delimiter: delimiter
   })
-  return s3Client.send(command)
+  return getClient().send(command)
 }
 
 function filterAndSortJsonFiles (contents = []) {
@@ -40,7 +45,7 @@ function filterAndSortJsonFiles (contents = []) {
 
 async function fetchJsonObject (key) {
   const getCommand = new GetObjectCommand({ Bucket: s3Bucket, Key: key })
-  const getResponse = await s3Client.send(getCommand)
+  const getResponse = await getClient().send(getCommand)
   const dataString = await getResponse.Body.transformToString()
   return JSON.parse(dataString)
 }
@@ -144,7 +149,7 @@ export async function downloadS3File (clientId, filename) {
   try {
     const key = `${clientId}/${filename}`
     const getCommand = new GetObjectCommand({ Bucket: s3Bucket, Key: key })
-    const getResponse = await s3Client.send(getCommand)
+    const getResponse = await getClient().send(getCommand)
     return getResponse.Body.transformToString()
   } catch (error) {
     logger.error(`Error downloading S3 file ${filename} for client ${clientId}: ${error.message}`)
@@ -186,7 +191,7 @@ export async function uploadS3File (clientId, filename, content) {
       Body: content,
       ContentType: 'application/json'
     })
-    await s3Client.send(putCommand)
+    await getClient().send(putCommand)
     logger.info(`Successfully uploaded S3 file ${filename} for client ${clientId}`)
     return { success: true, key }
   } catch (error) {
@@ -206,7 +211,7 @@ export async function deleteS3File (clientId, filename) {
       Bucket: s3Bucket,
       Key: key
     })
-    await s3Client.send(deleteCommand)
+    await getClient().send(deleteCommand)
     logger.info(`Successfully deleted S3 file ${filename} for client ${clientId}`)
     return { success: true }
   } catch (error) {
