@@ -289,7 +289,7 @@ npm run test:watch
 ```
 
 The S3 data tests under `test/integration/data/` run as part of `npm test` —
-they spin up their own LocalStack via [Testcontainers](https://testcontainers.com/)
+they spin up their own Floci via [Testcontainers](https://testcontainers.com/)
 on a dynamic port, so no separate stack is needed. **Docker must be running** for
 them to pass.
 
