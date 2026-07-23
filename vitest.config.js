@@ -2,7 +2,7 @@ import { defineConfig, configDefaults } from 'vitest/config'
 
 // The env block mirrors what the deleted compose.test.yml used to provide, so
 // a bare `npm test` runs the full suite. The S3 local integration tests spin up
-// their own LocalStack via Testcontainers on a dynamic port (Docker required),
+// their own Floci via Testcontainers on a dynamic port (Docker required),
 // so they run under `npm test` with no external stack — AWS_ENDPOINT_URL below
 // is just a load-time default; the test overrides it at runtime via config.set.
 

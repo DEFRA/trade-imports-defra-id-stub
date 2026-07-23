@@ -11,7 +11,7 @@ Defra Identity authentication stub for Trade Imports. Supports CRN/Password auth
 - **Testing**: Vitest 3.2 with V8 coverage
 - **Config**: Convict with environment-driven validation
 - **Views**: Nunjucks with GovUK Frontend 5.10
-- **Storage**: AWS S3 (LocalStack locally, optional) + Redis (always required for YAR sessions)
+- **Storage**: AWS S3 (Floci locally, optional) + Redis (always required for YAR sessions)
 - **Auth**: Custom JWT generation + @hapi/bell (Entra) + @hapi/cookie
 
 ### Plugin Architecture
@@ -52,7 +52,7 @@ Always check Entra flag before adding Entra-specific code.
 # Full stack (preferred) — run from the workspace root
 ./scripts/stack/run-stack.sh -d  # builds + runs every service from local source
 
-# This service alone in watch mode (needs Redis/LocalStack, e.g. from the stack)
+# This service alone in watch mode (needs Redis/Floci, e.g. from the stack)
 npm run dev  # runs frontend:watch & server:watch concurrently
 ```
 
@@ -68,7 +68,7 @@ AWS_S3_ENABLED=true
 ### Testing
 ```bash
 npm run build:frontend  # once — the static-file tests serve the webpack output
-npm test  # whole suite (unit + integration) once with coverage; Docker must be running — the S3 integration test spins up its own LocalStack via Testcontainers
+npm test  # whole suite (unit + integration) once with coverage; Docker must be running — the S3 integration test spins up its own Floci via Testcontainers
 npm run test:watch  # watch mode for TDD
 ```
 
@@ -87,7 +87,7 @@ vi.mock('../module.js', () => ({ exportName: mockFn }))
 ```
 
 Tests organized:
-- `test/integration/` - integration tests: route/plugin tests via `server.inject()`, plus S3 data tests against Testcontainers LocalStack
+- `test/integration/` - integration tests: route/plugin tests via `server.inject()`, plus S3 data tests against Testcontainers Floci
 - `test/unit/` - pure unit tests
 
 ### Linting

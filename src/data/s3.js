@@ -7,7 +7,7 @@ const { s3Bucket } = config.get('aws')
 const logger = createLogger()
 
 // Built lazily on first use (not at import) so tests can inject a dynamic
-// endpoint — e.g. a Testcontainers LocalStack on a random port — via
+// endpoint — e.g. a Testcontainers Floci on a random port — via
 // config.set('aws.endpoint', ...) before the first S3 call.
 let s3Client
 
