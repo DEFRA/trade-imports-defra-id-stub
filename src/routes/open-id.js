@@ -11,9 +11,13 @@ const { constants: httpConstants } = http2
 
 const { HTTP_STATUS_BAD_REQUEST } = httpConstants
 
+export const WELL_KNOWN_PATH = '/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration'
+export const TOKEN_PATH = '/dcidmtest.onmicrosoft.com/b2c_1a_cui_cpdev_signupsigninsfi/oauth2/v2.0/token'
+export const JWKS_PATH = '/dcidmtest.onmicrosoft.com/b2c_1a_cui_cpdev_signupsigninsfi/discovery/v2.0/keys'
+
 const wellKnown = {
   method: 'GET',
-  path: '/idphub/b2c/b2c_1a_cui_cpdev_signupsigninsfi/.well-known/openid-configuration',
+  path: WELL_KNOWN_PATH,
   options: {
     tags: ['api']
   },
@@ -64,7 +68,7 @@ const tokenSchema = Joi.object({
 
 const token = {
   method: 'POST',
-  path: '/dcidmtest.onmicrosoft.com/b2c_1a_cui_cpdev_signupsigninsfi/oauth2/v2.0/token',
+  path: TOKEN_PATH,
   options: {
     tags: ['api']
   },
@@ -133,7 +137,7 @@ const signOut = {
 
 const jwks = {
   method: 'GET',
-  path: '/dcidmtest.onmicrosoft.com/b2c_1a_cui_cpdev_signupsigninsfi/discovery/v2.0/keys',
+  path: JWKS_PATH,
   options: {
     tags: ['api']
   },

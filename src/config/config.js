@@ -383,5 +383,82 @@ export const config = convict({
       default: 1000 * 60 * 60 * 24,
       env: 'REDIS_TTL'
     }
+  },
+  latency: {
+    profile: {
+      doc: 'The latency profile every integration uses unless its own is set',
+      format: ['zero-delay', 'sla'],
+      default: 'zero-delay',
+      env: 'STUB_LATENCY_PROFILE'
+    },
+    defraId: {
+      profile: {
+        doc: 'The latency profile of the Defra ID integration, falling back to the stub-wide profile',
+        format: ['zero-delay', 'sla'],
+        nullable: true,
+        default: null,
+        env: 'STUB_LATENCY_DEFRA_ID_PROFILE'
+      },
+      interfaceName: {
+        doc: 'The interface the Defra ID profile represents',
+        format: String,
+        default: 'Defra Identity OIDC discovery, token and signing keys'
+      },
+      owner: {
+        doc: 'Who owns the interface the Defra ID profile represents',
+        format: String,
+        default: 'Customer Identity'
+      },
+      serviceLevelSource: {
+        doc: 'The service level the Defra ID targets were derived from',
+        format: String,
+        default: 'Interim (c-011 default): §9.5 IDM latency is TBC'
+      },
+      agreed: {
+        doc: 'Whether the Defra ID targets have been agreed with the owner',
+        format: Boolean,
+        default: false,
+        env: 'STUB_LATENCY_DEFRA_ID_AGREED'
+      },
+      lastConformed: {
+        doc: 'The date the Defra ID profile was last conformed to the real system, as YYYY-MM-DD',
+        format: function (val) {
+          if (val === null) {
+            return
+          }
+
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+            throw new Error('Must be null or a date in format "YYYY-MM-DD"')
+          }
+
+          const parsed = new Date(`${val}T00:00:00Z`)
+
+          if (Number.isNaN(parsed.getTime()) || parsed.toISOString().slice(0, 10) !== val) {
+            throw new Error('Must be null or a date in format "YYYY-MM-DD"')
+          }
+        },
+        nullable: true,
+        default: null,
+        env: 'STUB_LATENCY_DEFRA_ID_LAST_CONFORMED'
+      },
+      p50Ms: {
+        doc: 'The Defra ID median latency target in milliseconds',
+        format: 'nat',
+        default: 100,
+        env: 'STUB_LATENCY_DEFRA_ID_P50_MS'
+      },
+      p95Ms: {
+        doc: 'The Defra ID 95th percentile latency target in milliseconds',
+        format: 'nat',
+        default: 400,
+        env: 'STUB_LATENCY_DEFRA_ID_P95_MS'
+      },
+      p99Ms: {
+        doc: 'The Defra ID 99th percentile latency target in milliseconds',
+        format: 'nat',
+        default: 1000,
+        env: 'STUB_LATENCY_DEFRA_ID_P99_MS'
+      }
+    }
   }
 })
