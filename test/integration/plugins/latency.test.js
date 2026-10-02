@@ -6,6 +6,12 @@ import { JWKS_PATH } from '../../../src/routes/open-id.js'
 const { createServer } = await import('../../../src/server.js')
 
 const targetMs = 50
+const authorizeQuery = {
+  serviceId: '11111111-1111-1111-1111-111111111111',
+  client_id: '00000000-0000-0000-0000-000000000000',
+  redirect_uri: 'https://example.com/callback',
+  scope: 'openid'
+}
 const authorizePath = '/dcidmtest.onmicrosoft.com/b2c_1a_cui_cpdev_signupsigninsfi/oauth2/v2.0/authorize'
 
 describe('latency plugin', () => {
@@ -47,6 +53,7 @@ describe('latency plugin', () => {
     expect(response.result.stub).toBe('trade-imports-defra-id-stub')
     expect(integration.profile).toBe('sla')
     expect(integration.answered.count).toBeGreaterThanOrEqual(1)
+    expect(integration.answered.peakPerSecond).toBeGreaterThanOrEqual(1)
     expect(integration.answered.p50Ms).toBeGreaterThanOrEqual(targetMs - 1)
   })
 
@@ -57,16 +64,23 @@ describe('latency plugin', () => {
     const { integration } = await defraId()
 
     expect(cleared.statusCode).toBe(204)
-    expect(integration.answered).toEqual({ count: 0, p50Ms: null, p95Ms: null, p99Ms: null })
+    expect(integration.answered).toEqual({ count: 0, peakPerSecond: 0, p50Ms: null, p95Ms: null, p99Ms: null })
   })
 
   test('should not count a browser-facing request', async () => {
     const { integration: before } = await defraId()
 
-    await server.inject({ url: authorizePath })
+    const authorize = await server.inject({ url: `${authorizePath}?${new URLSearchParams(authorizeQuery).toString()}` })
 
     const { integration: after } = await defraId()
 
+    expect(authorize.statusCode).toBe(302)
     expect(after.answered.count).toBe(before.answered.count)
+
+    await server.inject({ url: JWKS_PATH })
+
+    const { integration: afterProfiled } = await defraId()
+
+    expect(afterProfiled.answered.count).toBe(before.answered.count + 1)
   })
 })
