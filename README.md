@@ -297,6 +297,30 @@ CDP perf-test sets `STUB_LATENCY_PROFILE=sla` in cdp-app-config; that change is 
 
 `GET /latency-profiles` reports, for each integration: `integration`, `interface`, `owner`, `serviceLevelSource`, `agreed`, `lastConformed`, `profile`, `slaTargets`, `fitted`, `targets` (the targets the running profile aims for, zero for `zero-delay`) and `answered` (`count`, `peakPerSecond`, `p50Ms`, `p95Ms`, `p99Ms`). `answered` is measured from the stub receiving a request to its response being ready, on the instance that answers the read. `peakPerSecond` is the most calls the instance answered within one wall-clock second since it started or was last cleared: the load the integration carried, which the performance tests judge against the stub's measured ceiling. `count` is every call since the stub started or the last clear, and the percentiles are over a random sample of up to 10,000 of them. The percentiles are null until the stub has answered a call since it started or was last cleared. `DELETE /latency-profiles/answered` forgets them all and returns 204. It is the same contract `trade-imports-stub` serves.
 
+### Fault injection
+
+The `defra-id` integration can also be made to fail, so the resilience runs in `trade-imports-performance-tests` can show how the frontends cope when sign-in breaks. A fault is switched on and off while the stub runs, with no rebuild or restart, and applies after the latency delay.
+
+A fault applies to the same three server-to-server paths as the latency profile (`.well-known/openid-configuration`, `oauth2/v2.0/token` and `discovery/v2.0/keys`). The browser-facing authorize, sign-in and sign-out pages are never faulted: the browser there is the load generator, so faulting them would test the load generator and not the services.
+
+There are five kinds of fault, and `defra-id` has one active fault at a time:
+
+| Kind | What a faulted request gets |
+|---|---|
+| `slow` | Waits `delayMs`, then is answered normally. |
+| `hang` | Is held for `delayMs`, far longer than any caller should wait, then the connection is destroyed with no answer. |
+| `reset` | The connection is destroyed at once, with no answer. |
+| `throttle` | Answers 429 with a `Retry-After` of `retryAfterSeconds` seconds. The real handler does not run. |
+| `error` | Answers `status` (500 to 599, default 503). The real handler does not run. |
+
+A fault applies to each request on its paths with probability `rate` (0 to 1). `paths` limits it to some of the three, and omitting it means all of them.
+
+- `PUT /faults/defra-id` switches a fault on, replacing any active one, and answers 200 with the integration's report. The body is `{"kind":"error","rate":0.5,"status":503,"expiresInSeconds":150}`. `delayMs` is required for `slow` and `hang`. `expiresInSeconds` (1 to 86,400) is required: every fault expires by itself, so a run that dies cannot leave the stub broken. An integration name the stub does not serve answers 404, as does a path outside the integration; a name that is not lowercase letters and hyphens, or an invalid body, answers 400.
+- `DELETE /faults/defra-id` switches the fault off and answers 204. `DELETE /faults` does the same for every integration. The counters are kept.
+- `GET /faults` reports `stub` and, for each integration, `integration`, `paths`, `fault` (null when none is on, otherwise `kind`, `rate`, `delayMs`, `status`, `retryAfterSeconds`, `paths` and `expiresAt`), `requests` (every request to its paths since the stub started) and `injected` (faults injected since the stub started, counted for each of `slow`, `hang`, `reset`, `throttle` and `error`). The counters are never reset, so a reader works in differences between two readings.
+
+Behind a load balancer a fault reaches only the instance that answered the `PUT`, so run one instance when you inject faults. It is the same contract `trade-imports-stub` serves for `trade-token` and `mdm`.
+
 ## Testing
 
 A single `npm test` runs the whole suite — unit and integration together.

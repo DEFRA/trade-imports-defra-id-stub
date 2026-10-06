@@ -2,6 +2,9 @@ import { createAnsweredLatencies } from './answered-latencies.js'
 import { Z95, Z99, fitLognormal, quantileMs, standardNormal } from './lognormal.js'
 import { JWKS_PATH, TOKEN_PATH, WELL_KNOWN_PATH } from '../routes/open-id.js'
 
+/** The Defra ID server-to-server paths: the ones latency and faults apply to. */
+export const DEFRA_ID_PATHS = Object.freeze([WELL_KNOWN_PATH, TOKEN_PATH, JWKS_PATH])
+
 const ZERO_DELAY = 'zero-delay'
 const SLA = 'sla'
 
@@ -22,7 +25,7 @@ export function buildIntegrations (latencyConfig, gaussian = standardNormal) {
   return [
     {
       integration: 'defra-id',
-      paths: [WELL_KNOWN_PATH, TOKEN_PATH, JWKS_PATH],
+      paths: [...DEFRA_ID_PATHS],
       profile,
       slaTargets,
       fit,
