@@ -1,8 +1,11 @@
-import neostandard from 'neostandard'
+import { globalIgnores } from 'eslint/config'
+import { neostandard } from 'neostandard'
 
-const eslint = neostandard({
-  ignores: ['.public/**']
-})
+// neostandard 0.14 scopes its `ignores` option to its own layers, so the
+// build output needs an explicit global ignore to stay out of every lint run.
+const ignores = ['.public/**']
+
+const eslint = neostandard({ ignores })
 
 for (const item of eslint) {
   if (item?.languageOptions?.ecmaVersion < 2025) {
@@ -10,4 +13,4 @@ for (const item of eslint) {
   }
 }
 
-export default eslint
+export default [globalIgnores(ignores), ...eslint]
