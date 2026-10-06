@@ -7,6 +7,7 @@ import Cookie from '@hapi/cookie'
 import { Engine as CatboxRedis } from '@hapi/catbox-redis'
 import { contentSecurityPolicy } from './plugins/content-security-policy.js'
 import { headers } from './plugins/headers.js'
+import { faults } from './plugins/faults.js'
 import { latency } from './plugins/latency.js'
 import { router } from './plugins/router.js'
 import { session } from './plugins/session.js'
@@ -85,6 +86,7 @@ export async function createServer () {
     requestLogger,
     requestTracing,
     latency,
+    faults,
     secureContext,
     pulse,
     nunjucksConfig,
