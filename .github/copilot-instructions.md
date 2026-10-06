@@ -7,7 +7,7 @@ Defra Identity authentication stub for Trade Imports. Supports CRN/Password auth
 
 ### Tech Stack
 - **Server**: Hapi.js 21.4 with ES modules (`type: "module"`)
-- **Node**: >=24.12.0
+- **Node**: >=24.15.0
 - **Testing**: Vitest 3.2 with V8 coverage
 - **Config**: Convict with environment-driven validation
 - **Views**: Nunjucks with GovUK Frontend 5.10
