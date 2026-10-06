@@ -27,6 +27,20 @@ const { privateKey, publicKey } = generateKeyPairSync('rsa', {
   }
 })
 
+// Generated at load, not in the test: a 4096-bit key takes a random, sometimes
+// multi-second time to find, which can outrun the 5s test timeout under load.
+const { privateKey: wrongPrivateKey } = generateKeyPairSync('rsa', {
+  modulusLength: 4096,
+  publicKeyEncoding: {
+    type: 'spki',
+    format: 'jwk'
+  },
+  privateKeyEncoding: {
+    type: 'pkcs8',
+    format: 'pem'
+  }
+})
+
 const mockPayload = { keys: [publicKey] }
 
 const mockToken = Jwt.token.generate({ name: 'A Farmer' }, { key: privateKey, algorithm: 'RS256' })
@@ -60,18 +74,6 @@ describe('verifyToken', () => {
   })
 
   test('should throw error if the token was not signed by the correct key', async () => {
-    const { privateKey: wrongPrivateKey } = generateKeyPairSync('rsa', {
-      modulusLength: 4096,
-      publicKeyEncoding: {
-        type: 'spki',
-        format: 'jwk'
-      },
-      privateKeyEncoding: {
-        type: 'pkcs8',
-        format: 'pem'
-      }
-    })
-
     const wrongToken = Jwt.token.generate({ name: 'A Farmer' }, { key: wrongPrivateKey, algorithm: 'RS256' })
 
     await expect(verifyToken(wrongToken)).rejects.toThrow('Invalid token signature')
