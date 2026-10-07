@@ -25,9 +25,6 @@ export default {
       import: ['./javascript/application.js', './stylesheets/application.scss']
     }
   },
-  experiments: {
-    outputModule: true
-  },
   mode: NODE_ENV === 'production' ? 'production' : 'development',
   devtool: NODE_ENV === 'production' ? 'source-map' : 'inline-source-map',
   watchOptions: {

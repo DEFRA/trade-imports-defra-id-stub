@@ -6,11 +6,16 @@ import { createLogger } from './logging/logger.js'
  *
  * Local development - 1 Redis instance
  * Environments - Elasticache / Redis Cluster with username and password
+ *
+ * ioredis 6 defaults to RESP3, a HELLO 3 handshake with AUTH inline.
+ * `protocol: 2` keeps the RESP2 wire behaviour of ioredis 5, which is
+ * what the ElastiCache ACL users are proven against.
  */
 export function buildRedisClient (redisConfig) {
   const logger = createLogger()
   const port = 6379
   const db = 0
+  const protocol = 2
   const keyPrefix = redisConfig.keyPrefix
   const host = redisConfig.host
   let redisClient
@@ -29,6 +34,7 @@ export function buildRedisClient (redisConfig) {
       port,
       host,
       db,
+      protocol,
       keyPrefix,
       ...credentials,
       ...tls
@@ -47,6 +53,7 @@ export function buildRedisClient (redisConfig) {
         dnsLookup: (address, callback) => callback(null, address),
         redisOptions: {
           db,
+          protocol,
           ...credentials,
           ...tls
         }
