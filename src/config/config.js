@@ -86,7 +86,7 @@ export const config = convict({
     level: {
       doc: 'Logging level',
       format: ['fatal', 'error', 'warn', 'info', 'debug', 'trace', 'silent'],
-      default: 'warn',
+      default: 'info',
       env: 'LOG_LEVEL'
     },
     format: {
@@ -98,9 +98,20 @@ export const config = convict({
     redact: {
       doc: 'Log paths to redact',
       format: Array,
-      default: isProduction
-        ? ['req.headers.authorization', 'req.headers.cookie', 'res.headers']
-        : []
+      default: [
+        'req.headers.authorization',
+        'req.headers.cookie',
+        'req.query.code',
+        'req.query.crn',
+        'req.query.id_token_hint',
+        'req.query.password',
+        'res.headers',
+        'payload.client_secret',
+        'payload.code',
+        'payload.crn',
+        'payload.password',
+        'payload.refresh_token'
+      ]
     }
   },
   httpProxy: {
