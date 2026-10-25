@@ -130,6 +130,8 @@ describe('faults plugin on a listening server', () => {
     server = await createServer()
     await server.start()
     baseUrl = server.info.uri
+    const warmUp = await fetch(`${baseUrl}/health`)
+    await warmUp.arrayBuffer()
   })
 
   afterEach(async () => {
