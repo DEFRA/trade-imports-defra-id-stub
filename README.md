@@ -211,6 +211,8 @@ This allows for more variation of automated tests and scenarios.
 
 Current mock data available can be viewed [here](./src/data/mock.json).
 
+CRNs `2100010201` to `2100010232` ("Isolated User 01" to "32") are reserved for the `trade-imports-ins-tests` suite: each parallel Playwright worker that needs records no other worker writes to signs in as its own one of these. Keep the range contiguous and no shorter than the suite's largest worker count.
+
 > NOTE: as per limitations above, mock data is limited.
 
 To enable this option set the `AUTH_MODE` environment variable to `mock`.
