@@ -50,7 +50,7 @@ Always check Entra flag before adding Entra-specific code.
 ### Running Locally
 ```bash
 # Full stack (preferred) — run from the workspace root
-./scripts/stack/run-stack.sh -d  # builds + runs every service from local source
+tim docker dev  # builds + runs every service from local source
 
 # This service alone in watch mode (needs Redis/Floci, e.g. from the stack)
 npm run dev  # runs frontend:watch & server:watch concurrently
