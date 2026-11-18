@@ -66,7 +66,7 @@ AUTH_OVERRIDE_FILE=example.data.json
 The stub also runs as part of the trade-imports-animals workspace stack
 ([DEFRA/trade-imports-animals-workspace](https://github.com/DEFRA/trade-imports-animals-workspace)),
 which starts it from the published image alongside the rest of the services:
-`./scripts/stack/run-stack.sh` from the workspace root.
+`tim docker up` from the workspace.
 
 ### Docker
 
