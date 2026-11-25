@@ -44,12 +44,11 @@ jobs:
           docker build --no-cache --tag cdp-node-frontend-template .
           exit $?
 
-#      - name: SonarQube Cloud scan
-#        if: github.actor != 'dependabot[bot]'
-#        uses: SonarSource/sonarcloud-github-action@master
-#        env:
-#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      - name: SonarCloud Scan
+        if: github.actor != 'dependabot[bot]'
+        uses: SonarSource/sonarqube-scan-action@master
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   # Deliberately a separate job from pr-validator. The audit (audit-ci over
   # `npm audit`) scans the whole installed tree against a live advisory feed,
