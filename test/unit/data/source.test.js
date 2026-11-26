@@ -82,7 +82,7 @@ describe('getData', () => {
 
       const result = await getData(clientId)
 
-      expect(result.people.length).toBe(2)
+      expect(result.people.length).toBe(34)
       expect(result.people[0].crn).toBe(2100010101)
     })
 
@@ -148,7 +148,7 @@ describe('getData', () => {
 
       const result = await getData(clientId)
 
-      expect(result.people.length).toBe(2)
+      expect(result.people.length).toBe(34)
       expect(result.people[0].crn).toBe(2100010101)
       expect(result.s3).toBe(false)
     })
@@ -185,7 +185,7 @@ describe('getData', () => {
 
       const result = await getData(clientId)
 
-      expect(result.people.length).toBe(2)
+      expect(result.people.length).toBe(34)
       expect(result.people[0].crn).toBe(2100010101)
     })
 
@@ -251,7 +251,7 @@ describe('getData', () => {
 
       const result = await getData(clientId)
 
-      expect(result.people.length).toBe(2)
+      expect(result.people.length).toBe(34)
       expect(result.people[0].crn).toBe(2100010101)
       expect(result.s3).toBe(false)
     })
@@ -406,7 +406,7 @@ describe('getData', () => {
 
       const result = await getData(clientId)
 
-      expect(result.people.length).toBe(2)
+      expect(result.people.length).toBe(34)
       expect(result.people[0].crn).toBe(2100010101)
     })
 
@@ -486,7 +486,7 @@ describe('getData', () => {
 
       const result = await getData(clientId)
 
-      expect(result.people.length).toBe(2)
+      expect(result.people.length).toBe(34)
       expect(result.people[0].crn).toBe(2100010101)
       expect(result.s3).toBe(false)
     })
